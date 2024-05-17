@@ -21,5 +21,12 @@
     },
     "require-dev": {
         "pestphp/pest": "2.34.6"
-    }
+    },
+  "require": {
+    "ext-json": "*",
+    "ext-simplexml": "*",
+    "ext-libxml": "*",
+    "ext-curl": "*",
+    "ext-http": "*"
+  }
 }

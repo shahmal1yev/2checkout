@@ -6,10 +6,15 @@ trait HasHTTPHeaderTrait
 {
     public function parseHeaders(string $stringHeaders): object
     {
-        $headers = [];
-        foreach(explode("\r\n", $stringHeaders) as $headerLine)
-            foreach(explode(": ", $headerLine) as $header => $value)
-                $headers[$header] = trim($value);
+        $headerLines = explode("\r\n", $stringHeaders);
+        foreach($headerLines as $headerLine)
+        {
+            $headerParts = explode(": ", $headerLine, 2);
+            $headerName = trim(current($headerParts));
+            $headerValue = trim(next($headerParts));
+
+            $headers[$headerName] = $headerValue;
+        }
 
         return (object) $headers;
     }

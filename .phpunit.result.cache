@@ -1,0 +1,1 @@
+{"version":1,"defects":{"\/var\/www\/php\/packages\/2checkout\/tests\/Unit\/REST6\/ClientTest.php::execute":3},"times":{"\/var\/www\/php\/packages\/2checkout\/tests\/Unit\/REST6\/ClientTest.php::execute":0.454,"\/var\/www\/php\/packages\/2checkout\/tests\/Feature\/ExampleTest.php::example":0.001,"\/var\/www\/php\/packages\/2checkout\/tests\/Unit\/ExampleTest.php::example":0}}

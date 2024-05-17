@@ -107,6 +107,5 @@ class Arr
             $current = &$current[$key];
 
         $current = $value;
-        echo 'testing';
     }
 }

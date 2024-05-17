@@ -98,3 +98,4 @@ fabric.properties
 !.idea/runConfigurations
 
 # End of https://www.toptal.com/developers/gitignore/api/phpstorm+all,composer
+.phpunit.result.cache

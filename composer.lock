@@ -3661,7 +3661,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "pestphp/pest": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],

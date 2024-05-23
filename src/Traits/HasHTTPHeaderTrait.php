@@ -6,6 +6,7 @@ trait HasHTTPHeaderTrait
 {
     public function parseHeaders(string $stringHeaders): object
     {
+        $headers = [];
         $headerLines = explode("\r\n", $stringHeaders);
         foreach($headerLines as $headerLine)
         {

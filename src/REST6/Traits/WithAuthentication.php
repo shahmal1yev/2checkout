@@ -5,17 +5,18 @@ namespace TwoCheckout\REST6\Traits;
 use DateTime;
 use DateTimeZone;
 use Exception;
+use LogicException;
 use TwoCheckout\Interfaces\HTTP\RequestInterface;
 
-trait HasAuthentication
+trait WithAuthentication
 {
     /**
      * @throws Exception
      */
-    public function setAuthenticationHeader(string $code, string $secretKey): RequestInterface
+    public function withAuthentication(string $code, string $secretKey): RequestInterface
     {
-        if (! $this instanceof RequestInterface)
-            throw new \LogicException("You must implement ".RequestInterface::class." for this trait");
+        if (! ($this instanceof RequestInterface))
+            throw new LogicException("You must implement ".RequestInterface::class." for this trait");
 
         $date = $this->prepareDate();
         $hashContent = $this->prepareHashContent($code, $date);

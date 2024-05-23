@@ -11,10 +11,10 @@ class XMLContentHandler implements ContentHandlerInterface
     /**
      * @throws ContentHandlerException
      */
-    public function decode(string $response): object
+    public function decode(string $data): object
     {
         $object = simplexml_load_string(
-            $response,
+            $data,
             "SimpleXMLElement",
             512,
             LIBXML_NOCDATA

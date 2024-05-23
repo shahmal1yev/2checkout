@@ -2,6 +2,8 @@
 
 namespace TwoCheckout\REST6\Enums;
 
+use InvalidArgumentException;
+
 class Environment
 {
     public static function __callStatic($name, $arguments)
@@ -9,7 +11,7 @@ class Environment
         $name = strtoupper($name);
 
         if (! static::isset($name))
-            throw new \InvalidArgumentException("'$name' is not a valid environment.");
+            throw new InvalidArgumentException("'$name' is not a valid environment.");
 
         return static::all()[$name];
     }

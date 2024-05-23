@@ -27,7 +27,7 @@ class Client
     /**
      * @throws CurlException
      */
-    public function execute(string $environment)
+    public function execute(string $environment): object
     {
         $handle = curl_init();
 

@@ -6,17 +6,18 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use LogicException;
-use TwoCheckout\Interfaces\HTTP\RequestInterface;
+use TwoCheckout\REST6\Exceptions\RequiredOptionArgumentMissingException;
+use TwoCheckout\REST6\Interfaces\HTTP\RestRequestInterface;
 
 trait WithAuthentication
 {
     /**
      * @throws Exception
      */
-    public function withAuthentication(string $code, string $secretKey): RequestInterface
+    public function withAuthentication(string $code, string $secretKey): RestRequestInterface
     {
-        if (! ($this instanceof RequestInterface))
-            throw new LogicException("You must implement ".RequestInterface::class." for this trait");
+        if (! ($this instanceof RestRequestInterface))
+            throw new LogicException("You must implement ".RestRequestInterface::class." for this trait");
 
         $date = $this->prepareDate();
         $hashContent = $this->prepareHashContent($code, $date);

@@ -18,4 +18,7 @@ interface RequestInterface
     public function getBody(): object;
     public function getUri(): string;
     public function getQueryParams($encode = true);
+    public function headerExists(string $path): bool;
+    public function fieldExists(string $path): bool;
+    public function queryParamExists(string $path): bool;
 }

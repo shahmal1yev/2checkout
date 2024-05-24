@@ -7,5 +7,5 @@ use TwoCheckout\Interfaces\HTTP\RequestInterface;
 
 interface RestRequestInterface extends RequestInterface
 {
-
+    public function build(): RestRequestInterface;
 }

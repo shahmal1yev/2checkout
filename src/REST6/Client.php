@@ -4,7 +4,7 @@ namespace TwoCheckout\REST6;
 
 use TwoCheckout\Exceptions\HTTP\CurlException;
 use TwoCheckout\Interfaces\HTTP\CurlResponseHandlerInterface;
-use TwoCheckout\REST6\Enums\Environment;
+use TwoCheckout\REST6\Enums\EnvironmentEnum;
 use TwoCheckout\REST6\Interfaces\HTTP\RestRequestInterface;
 use TwoCheckout\Traits\HasHTTPHeaderTrait;
 
@@ -20,7 +20,7 @@ class Client
         CurlResponseHandlerInterface $curlResponseHandler
     )
     {
-        $this->request = $request;
+        $this->request = $request->build();
         $this->responseHandler = $curlResponseHandler;
     }
 
@@ -29,6 +29,9 @@ class Client
      */
     public function execute(string $environment): object
     {
+        if (! EnvironmentEnum::isValid($environment))
+            throw new \InvalidArgumentException("'$environment' is not a valid environment");
+
         $handle = curl_init();
 
         $fullUrl = $this->getFullUrl($environment);
@@ -64,9 +67,9 @@ class Client
         );
     }
 
-    protected function getFullUrl($environment): string
+    protected function getFullUrl(string $environment): string
     {
-        $url = Environment::$environment();
+        $url = $environment;
         $uri = $this->request->getUri();
         $queryParameters = $this->request->getQueryParams();
 

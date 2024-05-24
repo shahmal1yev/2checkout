@@ -99,4 +99,19 @@ class Request implements RequestInterface
 
         return $this->request['queryParameters'];
     }
+
+    public function headerExists(string $path): bool
+    {
+        return Arr::exists($this->request['headers'], $path);
+    }
+
+    public function fieldExists(string $path): bool
+    {
+        return Arr::exists($this->request['body'], $path);
+    }
+
+    public function queryParamExists(string $path): bool
+    {
+        return Arr::exists($this->request['queryParameters'], $path);
+    }
 }

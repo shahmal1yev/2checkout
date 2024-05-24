@@ -23,7 +23,8 @@ class JSONContentHandler implements ContentHandlerInterface
                 JSON_THROW_ON_ERROR
             );
 
-            $json = (object) $json;
+            if (! is_object($json))
+                $json = (object) ['result' => $json];
 
             return $json;
         }

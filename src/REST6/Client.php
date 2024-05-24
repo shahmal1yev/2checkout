@@ -2,13 +2,15 @@
 
 namespace TwoCheckout\REST6;
 
+use InvalidArgumentException;
 use TwoCheckout\Exceptions\HTTP\CurlException;
+use TwoCheckout\Interfaces\ClientInterface;
 use TwoCheckout\Interfaces\HTTP\CurlResponseHandlerInterface;
 use TwoCheckout\REST6\Enums\EnvironmentEnum;
 use TwoCheckout\REST6\Interfaces\HTTP\RestRequestInterface;
 use TwoCheckout\Traits\HasHTTPHeaderTrait;
 
-class Client
+class Client implements ClientInterface
 {
     use HasHTTPHeaderTrait;
 
@@ -30,7 +32,7 @@ class Client
     public function execute(string $environment): object
     {
         if (! EnvironmentEnum::isValid($environment))
-            throw new \InvalidArgumentException("'$environment' is not a valid environment");
+            throw new InvalidArgumentException("'$environment' is not a valid environment");
 
         $handle = curl_init();
 

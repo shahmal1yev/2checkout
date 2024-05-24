@@ -3,9 +3,7 @@
 namespace Tests\Feature\REST6\Requests\Product\PostProduct;
 
 use Exception;
-use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use stdClass;
 use TwoCheckout\Data\ContentHandlers\JSONContentHandler;
 use TwoCheckout\Exceptions\HTTP\CurlException;
 use TwoCheckout\HTTP\CurlResponseHandler;
@@ -21,17 +19,15 @@ class CreateProductBasicTest extends TestCase
      */
     public function testCreateProductBasic()
     {
-        $contentHandler = new JSONContentHandler;
-
-        $request = new CreateProductBasic($contentHandler);
+        $request = new CreateProductBasic(new JSONContentHandler);
 
         $request->withAuthentication("255024088774", "(q?B%cmMlA3V|[t_*zp5")
             ->withName("Product Name")
-            ->withCode("Product Code 4444")
+            ->withCode(uniqid())
             ->withPricingConfigurations([
                 'Prices' => [
                     'Amount' => 1.4,
-                    'Currency' => 'EUR',
+                    'Currency' => 'USD',
                     'MaxQuantity' => '1',
                     'MinQuantity' => '1',
                     'OptionCodes' => []
@@ -42,12 +38,7 @@ class CreateProductBasicTest extends TestCase
 
         $response = $client->execute(EnvironmentEnum::PRODUCTION);
 
-        $expected = (object) [
-            'body' => (object) ['scalar' => true],
-            'statusCode' => 201
-        ];
-
-        $this->assertEquals($expected->body, $response->body);
-        $this->assertEquals($expected->statusCode, $response->statusCode);
+        $this->assertEquals(201, $response->statusCode);
+        $this->assertEquals((object) ['result' => true], $response->body);
     }
 }

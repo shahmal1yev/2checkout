@@ -15,12 +15,17 @@ class JSONContentHandler implements ContentHandlerInterface
     {
         try
         {
-            return json_decode(
+
+            $json = json_decode(
                 $data,
                 false,
                 512,
                 JSON_THROW_ON_ERROR
             );
+
+            $json = (object) $json;
+
+            return $json;
         }
         catch (JsonException $e)
         {

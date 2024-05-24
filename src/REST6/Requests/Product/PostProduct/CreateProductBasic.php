@@ -19,7 +19,6 @@ class CreateProductBasic extends Request implements CreateProductBasicInterface
     protected array $missingRequiredFields = [
         "ProductName",
         "ProductCode",
-        "PricingConfigurations"
     ];
 
     public function __construct(ContentHandlerInterface $contentHandler)
@@ -43,8 +42,10 @@ class CreateProductBasic extends Request implements CreateProductBasicInterface
     {
         $fieldName = "ProductCode";
         $this->setField($fieldName, $productCode);
-
-        Arr::forget($this->missingRequiredFields, $fieldName);
+        Arr::forget(
+            $this->missingRequiredFields,
+            array_search($fieldName, $this->missingRequiredFields)
+        );
 
         return $this;
     }
@@ -70,7 +71,10 @@ class CreateProductBasic extends Request implements CreateProductBasicInterface
     {
         $fieldName = "ProductName";
         $this->setField($fieldName, $productName);
-        Arr::forget($this->missingRequiredFields, $fieldName);
+        Arr::forget(
+            $this->missingRequiredFields,
+            array_search($fieldName, $this->missingRequiredFields)
+        );
 
         return $this;
     }
@@ -341,14 +345,14 @@ class CreateProductBasic extends Request implements CreateProductBasicInterface
     {
         $fieldName = "PricingConfigurations";
         $arguments = [
-            'Code' => ['nullable' => false, 'type' => 'string'],
-            'Default' => ['nullable' => false, 'type' => 'bool'],
-            'DefaultCurrency' => ['nullable' => false, 'type' => 'string'],
-            'Name' => ['nullable' => false, 'type' => 'string'],
-            'PriceOptions' => ['nullable' => false, 'type' => 'array'],
-            'PriceType' => ['nullable' => false, 'type' => 'string'],
+            'Code' => ['nullable' => true, 'type' => 'string'],
+            'Default' => ['nullable' => true, 'type' => 'bool'],
+            'DefaultCurrency' => ['nullable' => true, 'type' => 'string'],
+            'Name' => ['nullable' => true, 'type' => 'string'],
+            'PriceOptions' => ['nullable' => true, 'type' => 'array'],
+            'PriceType' => ['nullable' => true, 'type' => 'string'],
             'Prices'  => ['nullable' => false, 'type' => 'array'],
-            'PricingSchema' => ['nullable' => false, 'type' => 'string'],
+            'PricingSchema' => ['nullable' => true, 'type' => 'string'],
         ];
 
         $requiredArguments = array_filter($arguments, fn($param) => !($param['nullable']));
@@ -357,25 +361,29 @@ class CreateProductBasic extends Request implements CreateProductBasicInterface
             array_keys($pricingConfigurations)
         );
 
-        if (!empty($missingRequiredArguments))
+        if (! empty($missingRequiredArguments))
             throw new InvalidArgumentException(
                 "'$fieldName' has missing required arguments: ", implode(", ", $missingRequiredArguments)
             );
 
         foreach($pricingConfigurations as $key => $param)
         {
-            $validType = Arr::get($arguments, $key, false);
+            $validType = Arr::get($arguments, "$key.type", false);
 
             if ($validType === false)
                 continue;
 
             if (gettype($param) !== $validType)
                 throw new InvalidArgumentException(
-                    "'$param' is not a valid type for '$key'. That is must be of type $validType"
+                    "'$key' is not a valid type for '$fieldName'. That is must be of type $validType"
                 );
         }
 
         $this->setField($fieldName, $pricingConfigurations);
+        Arr::forget(
+            $this->missingRequiredFields,
+            array_search($fieldName, $missingRequiredArguments)
+        );
 
         return $this;
     }
@@ -385,7 +393,7 @@ class CreateProductBasic extends Request implements CreateProductBasicInterface
         $fieldName = 'Prices';
 
         $arguments = [
-            'Amount' => ['nullable' => false, 'type' => 'int|float'],
+            'Amount' => ['nullable' => false, 'type' => 'integer|double'],
             'Currency' => ['nullable' => false, 'type' => 'string'],
             'MaxQuantity' => ['nullable' => false, 'type' => 'string'],
             'MinQuantity' => ['nullable' => false, 'type' => 'string'],
@@ -400,12 +408,12 @@ class CreateProductBasic extends Request implements CreateProductBasicInterface
 
         if (!empty($missingRequiredArguments))
             throw new InvalidArgumentException(
-                "'$fieldName' has missing required arguments: ", implode(", ", $missingRequiredArguments)
+                "'$fieldName' has missing required arguments: " . implode(", ", $missingRequiredArguments)
             );
 
         foreach($prices as $key => $param)
         {
-            $validTypes = Arr::get($arguments, $key, false);
+            $validTypes = Arr::get($arguments, "$key.type", false);
 
             if ($validTypes === false)
                 continue;
@@ -433,7 +441,7 @@ class CreateProductBasic extends Request implements CreateProductBasicInterface
     {
         if (! empty($this->missingRequiredFields))
             throw new RequiredOptionArgumentMissingException(
-                self::class . " has missing required fields: ", implode(", ", $this->missingRequiredFields)
+                self::class . " has missing required fields: " . implode(", ", $this->missingRequiredFields)
             );
 
         $authHeaderName = "X-Avangate-Authentication";

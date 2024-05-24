@@ -52,7 +52,7 @@ class Client
         $response = curl_exec($handle);
 
         if ($response === false)
-            throw new CurlException("An error occurred while trying to execute the request: " . curl_error($handle));
+            throw new CurlException("An error occurred while trying to send the request: " . curl_error($handle));
 
         $headerSize = curl_getinfo($handle, CURLINFO_HEADER_SIZE);
         $headers = $this->parseHeaders(substr($response, 0, $headerSize));

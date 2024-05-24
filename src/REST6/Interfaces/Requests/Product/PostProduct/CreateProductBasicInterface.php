@@ -19,7 +19,7 @@ interface CreateProductBasicInterface extends RestRequestInterface
     public function withShortDescription(string $shortDescription): CreateProductBasicInterface;
     public function withLongDescription(string $longDescription): CreateProductBasicInterface;
     public function withSystemRequirements(string $requestSystemRequirements): CreateProductBasicInterface;
-    public function withCategory(string|bool $category = false): CreateProductBasicInterface;
+    public function withCategory($category = false): CreateProductBasicInterface;
     public function withPlatforms(array $platforms): CreateProductBasicInterface;
     public function withTrialUrl(string $trialUrl): CreateProductBasicInterface;
     public function withTrialDescription(string $trialDescription): CreateProductBasicInterface;

@@ -1,6 +1,6 @@
 <?php
 
-namespace TwoCheckout\REST6\Interfaces\HTTP;
+namespace TwoCheckout\REST6\Interfaces\Requests;
 
 
 use TwoCheckout\Interfaces\HTTP\RequestInterface;

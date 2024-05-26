@@ -2,7 +2,7 @@
 
 namespace TwoCheckout\REST6\Interfaces\Requests\Product;
 
-use TwoCheckout\REST6\Interfaces\HTTP\RestRequestInterface;
+use TwoCheckout\REST6\Interfaces\Requests\RestRequestInterface;
 
 interface GetProductInterface extends RestRequestInterface
 {

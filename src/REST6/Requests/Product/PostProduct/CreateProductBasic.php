@@ -8,8 +8,8 @@ use TwoCheckout\HTTP\Request;
 use TwoCheckout\Interfaces\Data\ContentHandlerInterface;
 use TwoCheckout\REST6\Enums\Requests\Product\PostProduct\ProductTypeEnum;
 use TwoCheckout\REST6\Exceptions\RequiredOptionArgumentMissingException;
-use TwoCheckout\REST6\Interfaces\HTTP\RestRequestInterface;
 use TwoCheckout\REST6\Interfaces\Requests\Product\PostProduct\CreateProductBasicInterface;
+use TwoCheckout\REST6\Interfaces\Requests\RestRequestInterface;
 use TwoCheckout\REST6\Traits\WithAuthentication;
 
 class CreateProductBasic extends Request implements CreateProductBasicInterface

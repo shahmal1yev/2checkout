@@ -6,7 +6,7 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use LogicException;
-use TwoCheckout\REST6\Interfaces\HTTP\RestRequestInterface;
+use TwoCheckout\REST6\Interfaces\Requests\RestRequestInterface;
 
 trait WithAuthentication
 {

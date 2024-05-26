@@ -5,8 +5,8 @@ namespace TwoCheckout\REST6\Requests\Product;
 use TwoCheckout\HTTP\Request;
 use TwoCheckout\Interfaces\Data\ContentHandlerInterface;
 use TwoCheckout\REST6\Exceptions\RequiredOptionArgumentMissingException;
-use TwoCheckout\REST6\Interfaces\HTTP\RestRequestInterface;
 use TwoCheckout\REST6\Interfaces\Requests\Product\GetProductInterface;
+use TwoCheckout\REST6\Interfaces\Requests\RestRequestInterface;
 use TwoCheckout\REST6\Traits\WithAuthentication;
 
 class GetProduct extends Request implements GetProductInterface

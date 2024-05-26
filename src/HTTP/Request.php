@@ -92,6 +92,11 @@ class Request implements RequestInterface
         return $this;
     }
 
+    public function getQueryParam(string $path): string
+    {
+        return Arr::get($this->request['queryParameters'], $path);
+    }
+
     public function getQueryParams($encode = true)
     {
         if ($encode)
@@ -108,6 +113,11 @@ class Request implements RequestInterface
     public function fieldExists(string $path): bool
     {
         return Arr::exists($this->request['body'], $path);
+    }
+
+    public function getField(string $path): string
+    {
+        return Arr::get($this->request['body'], $path);
     }
 
     public function queryParamExists(string $path): bool

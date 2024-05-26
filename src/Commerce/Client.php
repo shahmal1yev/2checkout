@@ -1,29 +1,28 @@
 <?php
 
-namespace TwoCheckout\REST6;
+namespace TwoCheckout\Commerce;
 
-use InvalidArgumentException;
+use TwoCheckout\Commerce\Interfaces\Requests\CommerceRequestInterface;
 use TwoCheckout\Exceptions\HTTP\CurlException;
 use TwoCheckout\Interfaces\ClientInterface;
 use TwoCheckout\Interfaces\HTTP\CurlResponseHandlerInterface;
 use TwoCheckout\REST6\Enums\EnvironmentEnum;
-use TwoCheckout\REST6\Interfaces\Requests\RestRequestInterface;
 use TwoCheckout\Traits\HasHTTPHeaderTrait;
 
 class Client implements ClientInterface
 {
     use HasHTTPHeaderTrait;
 
-    protected RestRequestInterface $request;
+    protected CommerceRequestInterface $request;
     protected CurlResponseHandlerInterface $responseHandler;
 
     public function __construct(
-        RestRequestInterface $request,
-        CurlResponseHandlerInterface $curlResponseHandler
+        CommerceRequestInterface $request,
+        CurlResponseHandlerInterface $responseHandler
     )
     {
         $this->request = $request->build();
-        $this->responseHandler = $curlResponseHandler;
+        $this->responseHandler = $responseHandler;
     }
 
     /**
@@ -32,7 +31,7 @@ class Client implements ClientInterface
     public function execute(string $environment): object
     {
         if (! EnvironmentEnum::isValid($environment))
-            throw new InvalidArgumentException("'$environment' is not a valid environment");
+            throw new \InvalidArgumentException("'$environment' is not a valid environment.");
 
         $handle = curl_init();
 
@@ -41,6 +40,12 @@ class Client implements ClientInterface
         $headers = $this->request->getHeaders();
         $body = $this->request->getBody();
         $encodedBody = $this->request->getEncoder()->encode($body);
+
+        if ($this->request->isRedirect())
+        {
+            header("Location: $fullUrl");
+            exit();
+        }
 
         curl_setopt_array($handle, [
             CURLOPT_URL => $fullUrl,

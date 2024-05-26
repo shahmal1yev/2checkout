@@ -2,7 +2,7 @@
 
 namespace TwoCheckout\REST6\Enums\Requests\Product\PostProduct;
 
-use TwoCheckout\REST6\Abstracts\EnumAbstract;
+use TwoCheckout\Abstracts\EnumAbstract;
 
 class ProductTypeEnum extends EnumAbstract
 {

@@ -8,7 +8,10 @@ interface RequestInterface
 {
     public function setHeader(string $path, $value): RequestInterface;
     public function setField(string $path, $value): RequestInterface;
+    public function fieldExists(string $path): bool;
+    public function getField(string $path): string;
     public function setQueryParam(string $path, $value): RequestInterface;
+    public function getQueryParam(string $path): string;
     public function setMethod(string $method): RequestInterface;
     public function setUri(string $uri): RequestInterface;
     public function getHeaders(): array;
@@ -19,6 +22,5 @@ interface RequestInterface
     public function getUri(): string;
     public function getQueryParams($encode = true);
     public function headerExists(string $path): bool;
-    public function fieldExists(string $path): bool;
     public function queryParamExists(string $path): bool;
 }

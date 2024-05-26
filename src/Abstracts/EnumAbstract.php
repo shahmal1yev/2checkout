@@ -1,6 +1,6 @@
 <?php
 
-namespace TwoCheckout\REST6\Abstracts;
+namespace TwoCheckout\Abstracts;
 
 abstract class EnumAbstract
 {

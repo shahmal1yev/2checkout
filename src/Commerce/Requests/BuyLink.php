@@ -3,9 +3,14 @@
 namespace TwoCheckout\Commerce\Requests;
 
 use InvalidArgumentException;
+use TwoCheckout\Commerce\Enum\CurrencyEnum;
 use TwoCheckout\Commerce\Enum\LanguageEnum;
 use TwoCheckout\Commerce\Interfaces\Requests\BuyLinkInterface;
 use TwoCheckout\Commerce\Interfaces\Requests\CommerceRequestInterface;
+use TwoCheckout\Exceptions\Data\InvalidCurrencyException;
+use TwoCheckout\Exceptions\Data\InvalidQuantityException;
+use TwoCheckout\Exceptions\Data\NegativePriceException;
+use TwoCheckout\Exceptions\Data\NotValidPriceException;
 use TwoCheckout\Helpers\Arr;
 use TwoCheckout\HTTP\Request;
 use TwoCheckout\Interfaces\Data\ContentHandlerInterface;
@@ -30,159 +35,72 @@ class BuyLink extends Request implements BuyLinkInterface
     protected string $secretKey;
 
     /**
-     * @var string The name of the query parameter for products.
+     * @var array Required query parameters for the buy link.
      */
-    protected string $productsQueryParamName;
+    protected array $requiredQueryParams;
 
     /**
-     * @var string The name of the query parameter for prices.
+     * @var array Query parameter names mapped to their respective keys.
      */
-    protected string $pricesQueryParamName;
-
-    /**
-     * @var string The name of the query parameter for quantities.
-     */
-    protected string $quantitiesQueryParamName;
-
-    /**
-     * @var string The name of the query parameter for pHash.
-     */
-    protected string $pHashQueryParamName;
-
-    /**
-     * @var string The name of the query parameter for language.
-     */
-    protected string $langQueryParamName;
-
-    /**
-     * @var string The name of the query parameter for locked express method.
-     */
-    protected string $lockedExpressQueryParamName;
+    protected array $queryParameterNames = [
+        'products'              => 'PRODS',
+        'prices'                => 'PRICES',
+        'quantities'            => 'QTY',
+        'language'              => 'LANG',
+        'lockedExpressMethod'   => 'CART',
+        'phash'                 => 'PHASH'
+    ];
 
     /**
      * @var array The query parameters array.
      */
-    protected array $queryParameters;
+    protected array $queryParameters = [];
 
     /**
      * BuyLink constructor.
      *
      * @param ContentHandlerInterface $contentHandler The content handler interface.
      * @param string $secretKey The secret key used for generating the pHash.
+     *
+     * @see https://verifone.cloud/docs/2checkout/Documentation/07Commerce/Checkout-links-and-options/Buy-Link-parameters Documentation
      */
     public function __construct(ContentHandlerInterface $contentHandler, string $secretKey)
     {
         parent::__construct($contentHandler);
 
         $this->secretKey = $secretKey;
+        $this->setUri('/order/checkout.php');
 
-        $this->langQueryParamName = 'LANG';
-        $this->pHashQueryParamName = 'PHASH';
-        $this->pricesQueryParamName = 'PRICES';
-        $this->quantitiesQueryParamName = 'QTY';
-        $this->productsQueryParamName = 'PRODS';
-        $this->lockedExpressQueryParamName = 'CART';
-
-        $this->queryParameters = [
-            $this->lockedExpressQueryParamName => '',
-            $this->quantitiesQueryParamName => '',
-            $this->productsQueryParamName => '',
-            $this->pricesQueryParamName => '',
-            $this->pHashQueryParamName => '',
-            $this->langQueryParamName => '',
+        $this->requiredQueryParams = [
+            Arr::get($this->queryParameterNames, 'products'),
+            Arr::get($this->queryParameterNames, 'prices'),
+            Arr::get($this->queryParameterNames, 'quantities'),
+            Arr::get($this->queryParameterNames, 'phash'),
         ];
-
-        $this->setUri('/order/checkout');
     }
 
     /**
-     * Add a product to the buy link with the specified ID, price, and quantity.
+     * Adds a product to the buy link with prices and quantity.
      *
-     * @param int $productID The ID of the product.
-     * @param numeric $price The price of the product.
+     * @param string $productID The product ID.
+     * @param array $prices The prices array where keys are currency codes and values are prices.
      * @param int $quantity The quantity of the product.
      * @return BuyLinkInterface
-     * @throws InvalidArgumentException When the price or quantity is invalid.
+     * @throws NegativePriceException
+     * @throws NotValidPriceException
+     * @throws InvalidCurrencyException
+     * @throws InvalidQuantityException
      */
-    public function addProduct(int $productID, $price, int $quantity): BuyLinkInterface
+    public function addProduct(string $productID, array $prices, int $quantity): BuyLinkInterface
     {
-        if (! (is_int($price) || is_float($price)))
-            throw new InvalidArgumentException("'\$price' must be numeric");
+        $this->validatePrices($prices);
+        $this->validateQuantity($quantity);
 
-        if ($price < 0)
-            throw new InvalidArgumentException("'\$price' cannot be negative");
-
-        if ($quantity < 0)
-            throw new InvalidArgumentException("'\$quantity' cannot be negative");
-
-        $price = round(floatval($price), 2);
-
-        $availablePrices = Arr::get($this->queryParameters, $this->pricesQueryParamName, '');
-        $availableProducts = Arr::get($this->queryParameters, $this->productsQueryParamName, '');
-        $availableQuantities = Arr::get($this->queryParameters, $this->quantitiesQueryParamName, '');
-
-        $newPrices = $this->getNewPrices($availablePrices, $price);
-        $newProducts = $this->getNewProducts($availableProducts, $productID);
-        $newQuantities = $this->getNewQuantities($availableQuantities, $quantity);
-
-        $this->queryParameters = [
-            $this->pricesQueryParamName => $newPrices,
-            $this->productsQueryParamName => $newProducts,
-            $this->quantitiesQueryParamName => $newQuantities,
-        ];
+        $this->setProduct($productID);
+        $this->setPrices($productID, $prices);
+        $this->setQuantity($quantity);
 
         return $this;
-    }
-
-    /**
-     * Generates a new product string with the added product ID.
-     *
-     * @param string $availableProducts The currently available product string.
-     * @param string $productID The ID of the new product.
-     * @return string The new product string.
-     */
-    protected function getNewProducts(string $availableProducts, string $productID): string
-    {
-        $newProducts = $availableProducts . ',' . $productID;
-
-        if ($availableProducts === '')
-            $newProducts = $productID;
-
-        return $newProducts;
-    }
-
-    /**
-     * Generates a new price string with the added price.
-     *
-     * @param string $availablePrices The currently available price string.
-     * @param string $price The price to be added.
-     * @return string The new price string.
-     */
-    protected function getNewPrices(string $availablePrices, string $price): string
-    {
-        $newPrices = $availablePrices . ',' . $price;
-
-        if ($availablePrices === '')
-            $newPrices = $price;
-
-        return $newPrices;
-    }
-
-    /**
-     * Generates a new quantity string with the added quantity.
-     *
-     * @param string $availableQuantities The currently available quantity string.
-     * @param string $quantity The quantity to be added.
-     * @return string The new quantity string.
-     */
-    protected function getNewQuantities(string $availableQuantities, string $quantity): string
-    {
-        $newQuantities = $availableQuantities . ',' . $quantity;
-
-        if ($availableQuantities === '')
-            $newQuantities = $quantity;
-
-        return $newQuantities;
     }
 
     /**
@@ -192,7 +110,8 @@ class BuyLink extends Request implements BuyLinkInterface
      */
     public function withLockedExpressMethod(): BuyLinkInterface
     {
-        $this->setQueryParam($this->lockedExpressQueryParamName, 0);
+        $lockedExpMethodQParamName = Arr::get($this->queryParameterNames, 'lockedExpressMethod');
+        $this->setQueryParam($lockedExpMethodQParamName, 0);
 
         return $this;
     }
@@ -204,7 +123,8 @@ class BuyLink extends Request implements BuyLinkInterface
      */
     public function withoutLockedExpressMethod(): BuyLinkInterface
     {
-        $this->setQueryParam($this->lockedExpressQueryParamName, 1);
+        $lockedExpMethodQParamName = Arr::get($this->queryParameterNames, 'lockedExpressMethod');
+        $this->setQueryParam($lockedExpMethodQParamName, 1);
 
         return $this;
     }
@@ -218,10 +138,11 @@ class BuyLink extends Request implements BuyLinkInterface
      */
     public function withLanguage(string $language): BuyLinkInterface
     {
-        if (! LanguageEnum::isValid($language))
+        if (!LanguageEnum::isValid($language))
             throw new InvalidArgumentException("'$language' is not a valid language code");
 
-        $this->setQueryParam($this->langQueryParamName, $language);
+        $languageQueryParamName = Arr::get($this->queryParameterNames, 'language');
+        $this->setQueryParam($languageQueryParamName, $language);
 
         return $this;
     }
@@ -233,31 +154,13 @@ class BuyLink extends Request implements BuyLinkInterface
      */
     public function build(): CommerceRequestInterface
     {
-        $this->queryParameters[$this->pHashQueryParamName] = $this->generatePHash();
+        $this->prepareForBuilding();
+        $this->preparePHash();
 
-        foreach($this->queryParameters as $name => $parameter)
-            $this->setQueryParam($name, $parameter);
+        foreach ($this->queryParameters as $name => $value)
+            $this->setQueryParam($name, $value);
 
         return $this;
-    }
-
-    /**
-     * Generates the pHash using HMAC-SHA3-256.
-     *
-     * @return string The generated pHash.
-     */
-    protected function generatePHash(): string
-    {
-        $queryParameters = $this->queryParameters;
-        unset($queryParameters[$this->pHashQueryParamName]);
-
-        $asUrlEncoded = http_build_query($queryParameters);
-        $lengthOf = strlen($asUrlEncoded);
-
-        $pHashContent = $lengthOf . $asUrlEncoded;
-        $hash = hash_hmac('sha3-256', $pHashContent, $this->secretKey);
-
-        return $hash;
     }
 
     /**
@@ -268,9 +171,168 @@ class BuyLink extends Request implements BuyLinkInterface
      */
     public function isRedirect(bool $redirect = null): bool
     {
-        if (! is_null($redirect))
+        if (!is_null($redirect))
             $this->redirect = $redirect;
 
         return $this->redirect;
+    }
+
+    /**
+     * Sets the product ID in the query parameters.
+     *
+     * @param string $productID The product ID.
+     * @return BuyLinkInterface
+     */
+    protected function setProduct(string $productID): BuyLinkInterface
+    {
+        $productQueryParameterName = Arr::get($this->queryParameterNames, 'products');
+        $availableProducts = Arr::get($this->queryParameters, $productQueryParameterName, []);
+        $this->queryParameters[$productQueryParameterName] = array_merge($availableProducts, [$productID]);
+
+        return $this;
+    }
+
+    /**
+     * Sets the prices for a product in the query parameters.
+     *
+     * @param string $productID The product ID.
+     * @param array $prices The prices array where keys are currency codes and values are prices.
+     * @return BuyLinkInterface
+     */
+    protected function setPrices(string $productID, array $prices): BuyLinkInterface
+    {
+        $pricesQueryParamName = Arr::get($this->queryParameterNames, 'prices');
+        foreach ($prices as $currency => $price)
+            $this->queryParameters[$pricesQueryParamName . $productID][$currency] = round(floatval($price), 2);
+
+        return $this;
+    }
+
+    /**
+     * Sets the quantity of a product in the query parameters.
+     *
+     * @param int $quantity The quantity of the product.
+     * @return BuyLinkInterface
+     */
+    protected function setQuantity(int $quantity): BuyLinkInterface
+    {
+        $quantityQueryParamName = Arr::get($this->queryParameterNames, 'quantities');
+        $availableQuantities = Arr::get($this->queryParameters, $quantityQueryParamName, []);
+        $newQuantities = array_merge($availableQuantities, [$quantity]);
+        $this->queryParameters[$quantityQueryParamName] = $newQuantities;
+
+        return $this;
+    }
+
+    /**
+     * Validates the quantity of a product.
+     *
+     * @param int $quantity The quantity of the product.
+     * @throws InvalidQuantityException If the quantity is less than 1.
+     */
+    protected function validateQuantity(int $quantity): void
+    {
+        if ($quantity < 1)
+            throw new InvalidQuantityException("'$quantity' quantity must be greater than 0");
+    }
+
+    /**
+     * Validates the prices array.
+     *
+     * @param array $prices The prices array where keys are currency codes and values are prices.
+     * @throws NotValidPriceException
+     * @throws NegativePriceException
+     * @throws InvalidCurrencyException
+     */
+    protected function validatePrices(array $prices): void
+    {
+        foreach ($prices as $currency => $price) {
+            $this->validatePrice($price);
+            $this->validateCurrency($currency);
+        }
+    }
+
+    /**
+     * Validates a price value.
+     *
+     * @param mixed $price The price value.
+     * @throws NotValidPriceException
+     * @throws NegativePriceException
+     */
+    protected function validatePrice($price): void
+    {
+        if (!(is_int($price) || is_float($price)))
+            throw new NotValidPriceException("'$price' is not a valid price. It must be an int or float");
+
+        if ($price < 0)
+            throw new NegativePriceException("'$price' is not a valid price. It must be a positive number");
+    }
+
+    /**
+     * Validates a currency code.
+     *
+     * @param string $currency The currency code.
+     * @throws InvalidCurrencyException If the currency code is not valid.
+     */
+    protected function validateCurrency(string $currency): void
+    {
+        if (!CurrencyEnum::isValid($currency))
+            throw new InvalidCurrencyException(
+                "'$currency' is not a valid currency. Use " . CurrencyEnum::class . " for setting it."
+            );
+    }
+
+    /**
+     * Prepares the query parameters for building the buy link.
+     */
+    protected function prepareForBuilding(): void
+    {
+        $this->prepareProducts();
+        $this->prepareQuantities();
+    }
+
+    /**
+     * Prepares the product IDs for the buy link.
+     */
+    protected function prepareProducts(): void
+    {
+        $productsQueryParamName = Arr::get($this->queryParameterNames, 'products', 'PRODS');
+        $products = Arr::get($this->queryParameters, $productsQueryParamName, []);
+        $this->queryParameters[$productsQueryParamName] = implode(",", $products);
+    }
+
+    /**
+     * Prepares the quantities for the buy link.
+     */
+    protected function prepareQuantities(): void
+    {
+        $quantitiesQueryParamName = Arr::get($this->queryParameterNames, 'quantities', 'QTY');
+        $quantities = Arr::get($this->queryParameters, $quantitiesQueryParamName, []);
+        $this->queryParameters[$quantitiesQueryParamName] = implode(",", $quantities);
+    }
+
+    /**
+     * Prepares the pHash for the buy link.
+     */
+    protected function preparePHash(): void
+    {
+        $pHash = $this->generatePHash();
+        $pHashQueryParamName = Arr::get($this->queryParameterNames, 'phash');
+        $this->queryParameters[$pHashQueryParamName] = $pHash;
+    }
+
+    /**
+     * Generates the pHash using HMAC-SHA3-256.
+     *
+     * @return string The generated pHash.
+     */
+    protected function generatePHash(): string
+    {
+        $asUrlEncoded = http_build_query($this->queryParameters);
+        $lengthOf = strlen($asUrlEncoded);
+        $pHashContent = $lengthOf . $asUrlEncoded;
+        $hash = hash_hmac('sha3-256', $pHashContent, $this->secretKey);
+
+        return $hash;
     }
 }

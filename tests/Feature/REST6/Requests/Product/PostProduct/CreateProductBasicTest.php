@@ -23,7 +23,7 @@ class CreateProductBasicTest extends TestCase
 
         $request->withAuthentication("255024088774", "(q?B%cmMlA3V|[t_*zp5")
             ->withName("Product Name")
-            ->withCode(uniqid())
+            ->withCode("ProductUniqueCode")
             ->withPricingConfigurations([
                 'Prices' => [
                     'Amount' => 1.4,

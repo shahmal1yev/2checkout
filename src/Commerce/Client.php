@@ -6,7 +6,7 @@ use TwoCheckout\Commerce\Interfaces\Requests\CommerceRequestInterface;
 use TwoCheckout\Exceptions\HTTP\CurlException;
 use TwoCheckout\Interfaces\ClientInterface;
 use TwoCheckout\Interfaces\HTTP\CurlResponseHandlerInterface;
-use TwoCheckout\REST6\Enums\EnvironmentEnum;
+use TwoCheckout\Commerce\Enum\EnvironmentEnum;
 use TwoCheckout\Traits\HasHTTPHeaderTrait;
 
 class Client implements ClientInterface

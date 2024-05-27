@@ -4,11 +4,13 @@ namespace TwoCheckout\Commerce\Enum;
 
 use TwoCheckout\Abstracts\EnumAbstract;
 
-class EnvironmentEnum extends EnumAbstract
+class CurrencyEnum extends EnumAbstract
 {
-    public const PRODUCTION = 'https://secure.2checkout.com';
+    public const USD = 'USD';
+    public const EUR = 'EUR';
 
     protected static array $allowedValues = [
-        self::PRODUCTION
+        self::USD,
+        self::EUR
     ];
 }

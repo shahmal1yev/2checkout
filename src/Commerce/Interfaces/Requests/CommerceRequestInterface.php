@@ -6,6 +6,5 @@ use TwoCheckout\Interfaces\HTTP\RequestInterface;
 
 interface CommerceRequestInterface extends RequestInterface
 {
-    public function build(): CommerceRequestInterface;
-    public function isRedirect(bool $redirect = null): bool;
+    public function build(string $environment): string;
 }

@@ -3,11 +3,14 @@
 namespace TwoCheckout\Commerce\Requests;
 
 use InvalidArgumentException;
+use TwoCheckout\Commerce\Builder\RequestBuilder;
 use TwoCheckout\Commerce\Enum\CurrencyEnum;
+use TwoCheckout\Commerce\Enum\EnvironmentEnum;
 use TwoCheckout\Commerce\Enum\LanguageEnum;
 use TwoCheckout\Commerce\Interfaces\Requests\BuyLinkInterface;
 use TwoCheckout\Commerce\Interfaces\Requests\CommerceRequestInterface;
 use TwoCheckout\Exceptions\Data\InvalidCurrencyException;
+use TwoCheckout\Exceptions\Data\InvalidEnvironmentException;
 use TwoCheckout\Exceptions\Data\InvalidQuantityException;
 use TwoCheckout\Exceptions\Data\NegativePriceException;
 use TwoCheckout\Exceptions\Data\NotValidPriceException;
@@ -22,7 +25,7 @@ use TwoCheckout\Interfaces\Data\ContentHandlerInterface;
  *
  * @see https://verifone.cloud/docs/2checkout/Documentation/07Commerce/Checkout-links-and-options/Buy-Link-parameters Documentation
  */
-class BuyLink extends Request implements BuyLinkInterface
+class BuyLink extends RequestBuilder implements BuyLinkInterface
 {
     /**
      * @var bool Indicates whether the request should redirect.
@@ -59,14 +62,13 @@ class BuyLink extends Request implements BuyLinkInterface
     /**
      * BuyLink constructor.
      *
-     * @param ContentHandlerInterface $contentHandler The content handler interface.
      * @param string $secretKey The secret key used for generating the pHash.
      *
      * @see https://verifone.cloud/docs/2checkout/Documentation/07Commerce/Checkout-links-and-options/Buy-Link-parameters Documentation
      */
-    public function __construct(ContentHandlerInterface $contentHandler, string $secretKey)
+    public function __construct(string $secretKey)
     {
-        parent::__construct($contentHandler);
+        parent::__construct();
 
         $this->secretKey = $secretKey;
         $this->setUri('/order/checkout.php');
@@ -150,31 +152,35 @@ class BuyLink extends Request implements BuyLinkInterface
     /**
      * Builds the buy link with all the necessary parameters.
      *
-     * @return CommerceRequestInterface
+     * @param string $environment
+     *
+     * @return string BuyLink
+     *
+     * @throws InvalidEnvironmentException
      */
-    public function build(): CommerceRequestInterface
+    public function build(string $environment): string
     {
+        $this->validateEnvironment($environment);
         $this->prepareForBuilding();
         $this->preparePHash();
 
         foreach ($this->queryParameters as $name => $value)
             $this->setQueryParam($name, $value);
 
-        return $this;
+        return sprintf("%s%s?%s", $environment, $this->getUri(), $this->getQueryParams());
     }
 
     /**
-     * Indicates whether the request should redirect.
+     * @param string $environment
      *
-     * @param bool|null $redirect If provided, sets the redirect option.
-     * @return bool The current redirect option value.
+     * @return void
+     *
+     * @throws InvalidEnvironmentException
      */
-    public function isRedirect(bool $redirect = null): bool
+    protected function validateEnvironment(string $environment): void
     {
-        if (!is_null($redirect))
-            $this->redirect = $redirect;
-
-        return $this->redirect;
+        if (! EnvironmentEnum::isValid($environment))
+            throw new InvalidEnvironmentException("'$environment' is not a valid environment.");
     }
 
     /**

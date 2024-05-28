@@ -19,6 +19,7 @@ class CreateProductBasic extends Request implements CreateProductBasicInterface
     protected array $missingRequiredFields = [
         "ProductName",
         "ProductCode",
+        "PricingConfigurations"
     ];
 
     public function __construct(ContentHandlerInterface $contentHandler)
@@ -105,7 +106,7 @@ class CreateProductBasic extends Request implements CreateProductBasicInterface
         );
 
         if (!empty($missingParams))
-            throw new InvalidArgumentException("'\$group' has missing required parameters: ", implode(", ", $missingParams));
+            throw new InvalidArgumentException("'\$group' has missing required parameters: " . implode(", ", $missingParams));
 
         $this->setField("ProductGroup", $group);
 
@@ -141,7 +142,7 @@ class CreateProductBasic extends Request implements CreateProductBasicInterface
 
         if (! empty($missingRequiredParameters))
             throw new RequiredOptionArgumentMissingException(
-                "'$fieldName' has missing required parameters: ", implode(", ", $missingRequiredParameters)
+                "'$fieldName' has missing required parameters: " . implode(", ", $missingRequiredParameters)
             );
 
         foreach($shippingClass as $key => $param)
@@ -216,7 +217,7 @@ class CreateProductBasic extends Request implements CreateProductBasicInterface
 
         if (! empty($requiredArguments))
             throw new InvalidArgumentException(
-                "'\$platforms' has missing required arguments: ", implode(", ", $missingRequiredArguments)
+                "'\$platforms' has missing required arguments: " . implode(", ", $missingRequiredArguments)
             );
 
         foreach($platforms as $key => $param)
@@ -290,7 +291,7 @@ class CreateProductBasic extends Request implements CreateProductBasicInterface
 
         if (!empty($missingRequiredArguments))
             throw new InvalidArgumentException(
-                "'$fieldName' has missing required arguments: ", implode(", ", $missingRequiredArguments)
+                "'$fieldName' has missing required arguments: " . implode(", ", $missingRequiredArguments)
             );
 
         $this->setField($fieldName, $additionalFields);
@@ -320,7 +321,7 @@ class CreateProductBasic extends Request implements CreateProductBasicInterface
 
         if (!empty($missingRequiredArguments))
             throw new InvalidArgumentException(
-                "'$fieldName' has missing required arguments: ", implode(", ", $missingRequiredArguments)
+                "'$fieldName' has missing required arguments: " . implode(", ", $missingRequiredArguments)
             );
 
         foreach($translations as $key => $param)
@@ -344,45 +345,11 @@ class CreateProductBasic extends Request implements CreateProductBasicInterface
     public function withPricingConfigurations(array $pricingConfigurations): CreateProductBasicInterface
     {
         $fieldName = "PricingConfigurations";
-        $arguments = [
-            'Code' => ['nullable' => true, 'type' => 'string'],
-            'Default' => ['nullable' => true, 'type' => 'bool'],
-            'DefaultCurrency' => ['nullable' => true, 'type' => 'string'],
-            'Name' => ['nullable' => true, 'type' => 'string'],
-            'PriceOptions' => ['nullable' => true, 'type' => 'array'],
-            'PriceType' => ['nullable' => true, 'type' => 'string'],
-            'Prices'  => ['nullable' => false, 'type' => 'array'],
-            'PricingSchema' => ['nullable' => true, 'type' => 'string'],
-        ];
-
-        $requiredArguments = array_filter($arguments, fn($param) => !($param['nullable']));
-        $missingRequiredArguments = array_diff(
-            array_keys($requiredArguments),
-            array_keys($pricingConfigurations)
-        );
-
-        if (! empty($missingRequiredArguments))
-            throw new InvalidArgumentException(
-                "'$fieldName' has missing required arguments: ", implode(", ", $missingRequiredArguments)
-            );
-
-        foreach($pricingConfigurations as $key => $param)
-        {
-            $validType = Arr::get($arguments, "$key.type", false);
-
-            if ($validType === false)
-                continue;
-
-            if (gettype($param) !== $validType)
-                throw new InvalidArgumentException(
-                    "'$key' is not a valid type for '$fieldName'. That is must be of type $validType"
-                );
-        }
 
         $this->setField($fieldName, $pricingConfigurations);
         Arr::forget(
             $this->missingRequiredFields,
-            array_search($fieldName, $missingRequiredArguments)
+            array_search($fieldName, $this->missingRequiredFields)
         );
 
         return $this;

@@ -23,15 +23,9 @@ class CreateProductBasicTest extends TestCase
 
         $request->withAuthentication("255024088774", "(q?B%cmMlA3V|[t_*zp5")
             ->withName("Product Name")
-            ->withCode("ProductUniqueCode")
+            ->withCode(uniqid())
             ->withPricingConfigurations([
-                'Prices' => [
-                    'Amount' => 1.4,
-                    'Currency' => 'USD',
-                    'MaxQuantity' => '1',
-                    'MinQuantity' => '1',
-                    'OptionCodes' => []
-                ]
+                'Prices' => []
             ]);
 
         $client = new Client($request, new CurlResponseHandler);

@@ -6,7 +6,10 @@
         "psr-4": {
             "TwoCheckout\\": "src/",
             "Tests\\": "tests/"
-        }
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "authors": [
         {

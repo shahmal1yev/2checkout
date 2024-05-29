@@ -30,8 +30,8 @@ class GetProductTest extends TestCase
         $this->assertEquals(200, $response->statusCode);
 
         $responseAsArray = json_decode(json_encode($response), true);
-        $productNames = array_column(Arr::get($responseAsArray, 'body.Items'), 'ProductName');
-        $filteredNames = array_filter($productNames, fn ($productName) => $productName != "Product Name");
+        $productNames = array_column(Arr::get($responseAsArray, 'body.Items'), 'PRODUCT_NAME');
+        $filteredNames = array_filter($productNames, fn ($productName) => $productName != "PRODUCT_NAME");
 
         $this->assertEmpty($filteredNames);
     }

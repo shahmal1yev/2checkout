@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Commerce\ConvertPlus\BuyLink;
+namespace Tests\Feature\ConvertPlus\BuyLink;
 
 use DateTime;
 use PHPUnit\Framework\TestCase;
@@ -20,10 +20,13 @@ use TwoCheckout\JWT\TwoCheckout\TwoCheckoutJWTConfig;
 
 class BuyLinkGeneratorTest extends TestCase
 {
+    protected string $refNo;
     protected BuyLinkBuilderInterface $buyLinkBuilder;
 
     public function setUp(): void
     {
+        $this->refNo = uniqid();
+
         $twoCheckoutJWTConfig = (new TwoCheckoutJWTConfig())
             ->setAlgorithm(new HS512)
             ->setExpiration(new DateTime('+1 hour'))
@@ -48,6 +51,7 @@ class BuyLinkGeneratorTest extends TestCase
             ->setQuantity(3);
 
         $this->buyLinkBuilder = $builder->setMerchant('255024088774')
+            ->setOrderExtRef($this->refNo)
             ->setCurrency(CurrencyEnum::EUR)
             ->setDynamic(true)
             ->enableTestMode()

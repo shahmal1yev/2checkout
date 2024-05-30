@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Commerce\ConvertPlus\BuyLink;
+namespace Tests\Feature\ConvertPlus\BuyLink;
 
 use DateTime;
 use PHPUnit\Framework\TestCase;
@@ -48,6 +48,7 @@ class BuyLinkBuilderTest extends TestCase
             ->setQuantity(3);
 
         $linkBuilder = $builder->setMerchant('255024088774')
+            ->setOrderExtRef(uniqid())
             ->setCurrency(CurrencyEnum::EUR)
             ->setDynamic(true)
             ->enableTestMode()

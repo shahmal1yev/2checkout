@@ -12,12 +12,12 @@ class Product implements ProductInterface
     protected $price;
     protected string $type;
 
-    public function setPrice($price)
+    public function setPrice($price): ProductInterface
     {
-        $allowedTypes = ['integer', 'double'];
+        if (! is_numeric($price))
+            throw new InvalidArgumentException("'$price' must be numeric'");
 
-        if (! in_array(gettype($price), $allowedTypes))
-            throw new InvalidArgumentException("'$price' must be numeric");
+        $price = round(floatval($price), 2);
 
         if ($price < 0)
             throw new InvalidArgumentException("'$price' must be greater than 0");
@@ -32,7 +32,7 @@ class Product implements ProductInterface
         return $this->price;
     }
 
-    public function setQuantity(int $quantity)
+    public function setQuantity(int $quantity): ProductInterface
     {
         if ($quantity < 0)
             throw new InvalidArgumentException("'$quantity' must be greater than 0");
@@ -47,7 +47,7 @@ class Product implements ProductInterface
         return $this->quantity;
     }
 
-    public function setName(string $name)
+    public function setName(string $name): ProductInterface
     {
         $this->name = $name;
 

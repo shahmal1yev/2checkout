@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use TwoCheckout\Commerce\Enum\CurrencyEnum;
 use TwoCheckout\Commerce\Interfaces\ConvertPlus\BuyLink\BuyLinkBuilderInterface;
 use TwoCheckout\Commerce\Interfaces\ConvertPlus\Entities\ProductInterface;
+use TwoCheckout\ConvertPlus\Enums\RedirectTypeEnum;
 use TwoCheckout\Data\ContentHandlers\JSONContentHandler;
 use TwoCheckout\HTTP\Request;
 
@@ -24,7 +25,7 @@ class BuyLinkBuilder extends Request implements BuyLinkBuilderInterface
             ->setHeader('merchant-token', $jwtToken);
     }
 
-    public function setMerchant(string $merchant)
+    public function setMerchant(string $merchant): BuyLinkBuilderInterface
     {
         $this->setQueryParam('merchant', $merchant)
             ->setField('merchant', $merchant);
@@ -32,7 +33,7 @@ class BuyLinkBuilder extends Request implements BuyLinkBuilderInterface
         return $this;
     }
 
-    public function setDynamic(bool $dynamic)
+    public function setDynamic(bool $dynamic): BuyLinkBuilderInterface
     {
         $this->setQueryParam('dynamic', "$dynamic")
             ->setField('dynamic', "$dynamic");
@@ -40,7 +41,7 @@ class BuyLinkBuilder extends Request implements BuyLinkBuilderInterface
         return $this;
     }
 
-    public function enableTestMode()
+    public function enableTestMode(): BuyLinkBuilderInterface
     {
         $this->setQueryParam('test', '1')
             ->setField('test', '1');
@@ -48,7 +49,7 @@ class BuyLinkBuilder extends Request implements BuyLinkBuilderInterface
         return $this;
     }
 
-    public function setCurrency(string $currency)
+    public function setCurrency(string $currency): BuyLinkBuilderInterface
     {
         if (! CurrencyEnum::isValid($currency))
             throw new InvalidArgumentException("'$currency' is not a valid currency code.");
@@ -59,21 +60,37 @@ class BuyLinkBuilder extends Request implements BuyLinkBuilderInterface
         return $this;
     }
 
-    public function addProduct(ProductInterface $product)
+    public function addProduct(ProductInterface $product): BuyLinkBuilderInterface
     {
         $this->products[] = $product;
 
         return $this;
     }
 
-    public function build()
+    public function setRedirect(string $url, string $type): BuyLinkBuilderInterface
+    {
+        if (! filter_var($url, FILTER_VALIDATE_URL))
+            throw new InvalidArgumentException("'$url' is not a valid URL.");
+
+        if (! RedirectTypeEnum::isValid($type))
+            throw new InvalidArgumentException("'$type' is not a valid redirect type.");
+
+        $this->setQueryParam('return-url', $url)
+            ->setQueryParam('return-type', $type)
+            ->setField('return-url', $url)
+            ->setField('return-type', $type);
+
+        return $this;
+    }
+
+    public function build(): BuyLinkBuilderInterface
     {
         $this->setProducts();
 
         return $this;
     }
 
-    protected function setProducts()
+    protected function setProducts(): void
     {
         $this->setProductNames();
         $this->setProductQuantities();
@@ -95,7 +112,7 @@ class BuyLinkBuilder extends Request implements BuyLinkBuilderInterface
         $this->setProductData('price', 'getPrice');
     }
 
-    protected function setProductData(string $key, string $method)
+    protected function setProductData(string $key, string $method): void
     {
         $data = array_reduce($this->products, function ($carry, ProductInterface $product) use ($method) {
             $carry .= $product->$method() . ';';

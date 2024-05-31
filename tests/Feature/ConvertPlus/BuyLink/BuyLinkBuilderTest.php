@@ -48,7 +48,6 @@ class BuyLinkBuilderTest extends TestCase
             ->setQuantity(3);
 
         $linkBuilder = $builder->setMerchant('255024088774')
-            ->setOrderExtRef(uniqid())
             ->setCurrency(CurrencyEnum::EUR)
             ->setDynamic(true)
             ->enableTestMode()

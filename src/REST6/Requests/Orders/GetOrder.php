@@ -5,7 +5,7 @@ namespace TwoCheckout\REST6\Requests\Orders;
 use TwoCheckout\HTTP\Request;
 use TwoCheckout\Interfaces\Data\ContentHandlerInterface;
 use TwoCheckout\REST6\Exceptions\RequiredOptionArgumentMissingException;
-use TwoCheckout\Rest6\Interfaces\Requests\Orders\GetOrderInterface;
+use TwoCheckout\REST6\Interfaces\Requests\Orders\GetOrderInterface;
 use TwoCheckout\REST6\Interfaces\Requests\RestRequestInterface;
 use TwoCheckout\REST6\Traits\WithAuthentication;
 

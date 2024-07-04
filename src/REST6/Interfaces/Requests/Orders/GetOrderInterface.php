@@ -1,6 +1,6 @@
 <?php
 
-namespace TwoCheckout\Rest6\Interfaces\Requests\Orders;
+namespace TwoCheckout\REST6\Interfaces\Requests\Orders;
 
 use TwoCheckout\REST6\Interfaces\Requests\RestRequestInterface;
 
